@@ -62,28 +62,23 @@ class DNA_DECODING():
             bar1, bar2 = self.find_reverse(DNA)
             
             if not offset:  # No mismatch
-                
-                # Store index to reduce time complexity
-                idx1 = df.index[df.Barcode1 == bar1]
-                idx2 = df.index[df.Barcode2 == bar1]
 
-                if len(idx1)>0:   # If bar1 has been called before
-                    df.loc[idx1,'NumberB1'] += 1
-                elif len(idx2)>0:  # If bar1 has been called before
-                    df.loc[idx2,'NumberB2'] += 1
+                if sum(df.Barcode1 == bar1):  # If bar1 has been called before
+                    df.loc[(df.Barcode1 == bar1),'NumberB1'] += 1
+                elif sum(df.Barcode2 == bar1): # If bar1 has been called before
+                    df.loc[(df.Barcode2 == bar1),'NumberB2'] += 1
                 else: # New barcode
                     df.loc[counter, 'Barcode1'] = bar1
                     df.loc[counter,'Barcode2'] = bar2
                     df.loc[counter,'NumberB1'] += 1
             else:   # With mismatch
                 
-                idx1 = df.index[self.barcode_comparison(bar1,df.Barcode1)]
-                idx2 = df.index[self.barcode_comparison(bar1,df.Barcode2)]
-                
-                if len(idx1)>0:
-                    df.loc[idx1, 'NumberB1'] += 1
-                elif len(idx2)>0: 
-                    df.loc[idx2, 'NumberB2'] += 1
+                if sum(self.barcode_comparison(bar1,df.Barcode1)):
+                    df.loc[(self.barcode_comparison(bar1,df.Barcode1)),
+                           'NumberB1'] += 1
+                elif sum(self.barcode_comparison(bar1,df.Barcode2)): 
+                    df.loc[(self.barcode_comparison(bar1,df.Barcode2)),
+                           'NumberB2'] += 1
                 else:
                     df.loc[counter, 'Barcode1'] = bar1
                     df.loc[counter,'Barcode2'] = bar2
@@ -97,7 +92,7 @@ class DNA_DECODING():
         df.loc[(df.NumberB2 < df.NumberB1), 'MinCov'] = (
             df.loc[ (df.NumberB2 < df.NumberB1), 'NumberB2'] )
         
-        df = df.dropna()    # drop the empty rows
+        df = df.dropna()
         
         # Reorder the dataframe
         df = df.sort_values(by=['MinCov'], ascending=False)
