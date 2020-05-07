@@ -57,23 +57,27 @@ class DNA_DECODING():
         df.NumberB2 = df.fillna(0)
 
         counter = 0
+        BAR1 = {''}
+        BAR2 = {''}
 
         for DNA in data:
             bar1, bar2 = self.find_reverse(DNA)
             
             if not offset:  # No mismatch
-                
-                idx1 = df.index[df.Barcode1 == bar1]
-                idx2 = df.index[df.Barcode2 == bar1]
 
-                if len(idx1)>0:  # If bar1 has been called before
+                if bar1 in BAR1:  # If bar1 has been called before
+                    idx1 = df.index[df.Barcode1 == bar1]
                     df.loc[idx1,'NumberB1'] += 1
-                elif len(idx2)>0: # If bar1 has been called before
+                elif bar1 in BAR2: # If bar1 has been called before
+                    idx2 = df.index[df.Barcode2 == bar1]
                     df.loc[idx2,'NumberB2'] += 1
                 else: # New barcode
                     df.loc[counter, 'Barcode1'] = bar1
                     df.loc[counter,'Barcode2'] = bar2
                     df.loc[counter,'NumberB1'] += 1
+                    BAR1.add(bar1)
+                    BAR2.add(bar2)
+                    
             else:   # With mismatch
                 
                 idx1 = df.index[self.barcode_comparison(bar1,df.Barcode1)]

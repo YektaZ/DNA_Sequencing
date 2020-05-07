@@ -6,6 +6,10 @@ Created on Wed May  6 11:00:30 2020
 @author: fatemehzahed
 """
 import DNA_DECODING as DNA_fun
+from time import time
+
+
+t0 = time()
 
 # Create Object from DNA decoding 
 Object = DNA_fun.DNA_DECODING('data_scientist_exercise_file.fq',range(6))
@@ -31,3 +35,6 @@ print(df.loc[df.Barcode1 == 'TATACA'])
 print('\n')
 print('Head of dataframe of unpairs with counts: \n')
 print(df2.head())
+
+t1 = time()
+print('\n execution time = ',t1-t0)
