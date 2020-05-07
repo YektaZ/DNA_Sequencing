@@ -87,12 +87,10 @@ class DNA_DECODING():
             counter +=1
         
         # Set MinCov to min(NumberB1, Number B2)
-        df.loc[(df.NumberB1 <= df.NumberB2), 'MinCov'] = (
-            df.loc[ (df.NumberB1 <= df.NumberB2), 'NumberB1'] )
-        df.loc[(df.NumberB2 < df.NumberB1), 'MinCov'] = (
-            df.loc[ (df.NumberB2 < df.NumberB1), 'NumberB2'] )
+        for i in range(len(data)):
+            df.loc[i,'MinCov'] = min([df.loc[i,'NumberB1'], df.loc[i,'NumberB2']])
         
-        df = df.dropna()
+        df = df.dropna()    #drop the empty rows
         
         # Reorder the dataframe
         df = df.sort_values(by=['MinCov'], ascending=False)
@@ -103,7 +101,8 @@ class DNA_DECODING():
     def barcode_comparison(self, bar1, bars):
         """ 
         This function counts the number of mismatches between barcodes, 
-        returns a string of booleans
+        returns a string of booleans.
+        This function is activated only if offset != 0.
         """
         offset = self.offset
         difference = []
