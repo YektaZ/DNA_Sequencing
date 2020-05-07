@@ -51,7 +51,7 @@ class DNA_DECODING():
         
         offset = self.offset
 
-        columns = {'Barcode1', 'NumberB1', 'Barcode2', 'NumberB2'}
+        columns = {'Barcode1', 'NumberB1', 'Barcode2', 'NumberB2', 'MinCov'}
         df = pd.DataFrame(index=range(len(data)), columns=columns)
         df.NumberB1 = df.fillna(0)
         df.NumberB2 = df.fillna(0)
@@ -86,23 +86,17 @@ class DNA_DECODING():
 
             counter +=1
         
-        df = df.dropna()
-        df = self.reorder(df,data)
+        # Set MinCov to min(NumberB1, Number B2)
+        df.loc[(df.NumberB1 <= df.NumberB2), 'MinCov'] = (
+            df.loc[ (df.NumberB1 <= df.NumberB2), 'NumberB1'] )
+        df.loc[(df.NumberB2 < df.NumberB1), 'MinCov'] = (
+            df.loc[ (df.NumberB2 < df.NumberB1), 'NumberB2'] )
         
-        return df
-    
-    
-    def reorder(self, df, data):
-        """ Order by minimum coverage (NumberB1<NumberB2) """
-        for i in range(len(data)):
-            try:
-                if df.NumberB1[i] > df.NumberB2[i]:
-                    df.loc[i,'NumberB2'], df.loc[i,'NumberB1'] = (
-                        df.loc[i,'NumberB1'], df.loc[i,'NumberB2'])
-                    df.loc[i,'Barcode2'], df.loc[i,'Barcode1'] = (
-                        df.loc[i,'Barcode1'], df.loc[i,'Barcode2'])
-            except:
-                continue
+        df = df.dropna()
+        
+        # Reorder the dataframe
+        df = df.sort_values(by=['MinCov'], ascending=False)
+        
         return df
     
     
@@ -127,16 +121,19 @@ class DNA_DECODING():
     
     def save_pairs_to_csv(self, df):
         """ Save to .csv """
-        df = df[['Barcode1', 'NumberB1', 'Barcode2', 'NumberB2']]
+        df = df[['Barcode1', 'NumberB1', 'Barcode2', 'NumberB2', 'MinCov']]
         df.to_csv('pairs.csv', index=False)
       
         
     def save_unpairs_to_csv(self, df):
         """ Create a dataframe for unpairs and save as .csv """
-        df2 = df[df.NumberB1 == 0]
-        df2 = df2.sort_values(by=['NumberB2'], ascending=False)
-        df2 = df2.drop(['Barcode1', 'NumberB1'], axis = 1)
-        df2.rename(columns={'Barcode2': 'barcode', 'NumberB2': 'numbers'},
+        df2 = df[df.MinCov == 0]
+        
+        # Drop the second Barcode which it's count is always zero
+        df2 = df2.drop(['Barcode2', 'NumberB2'], axis = 1)
+        df2 = df2.sort_values(by=['NumberB1'], ascending=False)
+        
+        df2.rename(columns={'Barcode1': 'barcode', 'NumberB1': 'numbers'},
                    inplace=True)
         df2 = df2[['barcode', 'numbers']]
         df2.to_csv('unpaired.csv', index=False)

@@ -18,7 +18,7 @@ data = Object.get_data()
 df = Object.count_barcodes(data)
 
 # Save the dataframe as .csv
-Object.save_pairs_to_csv(df)
+#Object.save_pairs_to_csv(df)
 
 # Create another dataframe of non-pairs and save as .csv
 df2 = Object.save_unpairs_to_csv(df)
